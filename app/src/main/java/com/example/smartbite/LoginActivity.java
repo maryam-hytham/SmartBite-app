@@ -2,54 +2,66 @@ package com.example.smartbite;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.View;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
+import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.core.content.ContextCompat;
 
 public class LoginActivity extends AppCompatActivity {
-    Button loginBtn;
-    TextView emailError , passError;
-    EditText email , password;
 
-    @SuppressLint("MissingInflatedId")
+    private Button loginBtn, createAccountBtn;
+    private TextView emailError, passError;
+    private EditText email, password;
+    private Drawable eyeOpen, eyeClosed;
+    private boolean isPasswordVisible = false; // single boolean instead of array
+
+    @SuppressLint({"MissingInflatedId", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+
+        // Initialize views
+        loginBtn = findViewById(R.id.loginBtn);
+        createAccountBtn = findViewById(R.id.createAccountBtn);
+        email = findViewById(R.id.email);
+        password = findViewById(R.id.password);
+        emailError = findViewById(R.id.emailError);
+        passError = findViewById(R.id.passError);
+        eyeOpen = ContextCompat.getDrawable(this, R.drawable.eye__1_);
+        eyeClosed = ContextCompat.getDrawable(this, R.drawable.hidden__1_);
+
+        // Resize eye icons to fit EditText
+        int size = (int) (password.getLineHeight() * 0.8);
+        eyeOpen.setBounds(0, 0, size, size);
+        eyeClosed.setBounds(0, 0, size, size);
+
+        // Navigate to create account activity
+        createAccountBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
         });
-//        Navigate between activities
 
-
-        loginBtn = (Button) findViewById(R.id.loginBtn);
-        email = (EditText) findViewById(R.id.email);
-        password = (EditText) findViewById(R.id.password);
-        emailError = (TextView) findViewById(R.id.emailError);
-        passError = (TextView) findViewById(R.id.passErorr);
-// To disable the button in the start
+        // Initially disable login button
         loginBtn.setEnabled(false);
 
+        // Watch for changes in email and password to validate input
         TextWatcher watcher = new TextWatcher() {
             @Override
-            public void afterTextChanged(Editable s) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void afterTextChanged(Editable s) {
             }
 
             @Override
@@ -57,19 +69,62 @@ public class LoginActivity extends AppCompatActivity {
                 validateInput();
             }
         };
-    email.addTextChangedListener(watcher);
-    password.addTextChangedListener(watcher);
+        email.addTextChangedListener(watcher);
+        password.addTextChangedListener(watcher);
 
-      loginBtn.setOnClickListener(new View.OnClickListener() {
-          @Override
-          public void onClick(View v) {
-              Intent int1= new Intent(LoginActivity.this , HomeActivity.class);
-              startActivity(int1);
-          }
-      });
+        // Navigate to next activity on login
+        loginBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
+        });
+
+        // Show eye icon when user types
+        password.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() > 0) {
+                    password.setCompoundDrawables(null, null, eyeOpen, null);
+                } else {
+                    password.setCompoundDrawables(null, null, null, null);
+                    isPasswordVisible = false;
+                    password.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                }
+            }
+        });
+
+        // Toggle password visibility when clicking the eye icon
+        password.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                int drawableEnd = 2; // right drawable
+                if (password.getCompoundDrawables()[drawableEnd] != null &&
+                        event.getRawX() >= (password.getRight() - password.getCompoundDrawables()[drawableEnd].getBounds().width() - password.getPaddingEnd())) {
+
+                    if (isPasswordVisible) {
+                        password.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                        password.setCompoundDrawables(null, null, eyeOpen, null);
+                        isPasswordVisible = false;
+                    } else {
+                        password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                        password.setCompoundDrawables(null, null, eyeClosed, null);
+                        isPasswordVisible = true;
+                    }
+                    password.setSelection(password.getText().length());
+                    return true;
+                }
+            }
+            return false;
+        });
     }
+
     @SuppressLint("SetTextI18n")
-//    Method to validate email and password input
     private void validateInput() {
         String emailText = email.getText().toString().trim();
         String passText = password.getText().toString().trim();
@@ -77,7 +132,7 @@ public class LoginActivity extends AppCompatActivity {
         boolean validEmail = android.util.Patterns.EMAIL_ADDRESS.matcher(emailText).matches();
         boolean validPass = passText.length() >= 6;
 
-        // Show or clear error messages
+        // Show error messages
         if (!validEmail && !emailText.isEmpty()) {
             emailError.setText("Enter a valid email");
         } else {
@@ -90,8 +145,7 @@ public class LoginActivity extends AppCompatActivity {
             passError.setText("");
         }
 
-        // Enable the button only if both are valid
+        // Enable login button only if both are valid
         loginBtn.setEnabled(validEmail && validPass);
     }
 }
-

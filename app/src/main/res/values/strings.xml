@@ -1,6 +1,15 @@
 <resources>
+    <!--Log activity strings-->
     <string name="app_name">Smart Bite</string>
-    <string name="Login">Login</string>
-  <string name="user_email">Enter your email</string>
-    <string name="user_password">Enter your password</string>
+    <string name="welcoming">Welcome to Smart Bite</string>
+    <string name="action_login">Login</string>
+    <string name="prompt_email">Enter your email</string>
+    <string name="prompt_password">Enter your password</string>
+    <string name="app_slogan">Eat smart, live healthy</string>
+    <string name="action_create_account">Create Account</string>
+
+    <!--Register activity strings-->
+    <string name="prompt_name">Enter your name</string>
+    <string name="continue_btn">Continue</string>
+    <string name="back_btn">Back</string>
 </resources>
