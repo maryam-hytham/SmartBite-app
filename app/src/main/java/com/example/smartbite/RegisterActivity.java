@@ -125,7 +125,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
             return false;
         });
-        
+
         //    Back button to navigate back
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,9 +147,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Show or clear error messages
         if (!validEmail && !emailText.isEmpty()) {
+            emailError.setVisibility(View.VISIBLE);
             emailError.setText("Enter a valid email");
         } else {
             emailError.setText("");
+            emailError.setVisibility(View.GONE);
         }
 
         if (!validPass && !passText.isEmpty()) {
