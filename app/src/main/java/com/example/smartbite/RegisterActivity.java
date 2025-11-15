@@ -54,14 +54,16 @@ public class RegisterActivity extends AppCompatActivity {
         eyeOpen.setBounds(0, 0, size, size);
         eyeClosed.setBounds(0, 0, size, size);
 
-//        Navigate to home page pressing continue button
+//        Navigate to create profile activity pressing continue button
         continueBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent int1 = new Intent(RegisterActivity.this, HomeActivity.class);
+                Intent int1 = new Intent(RegisterActivity.this, ProfileInfosActivity.class);
                 startActivity(int1);
             }
         });
+
+
         // To disable the button in the start till successful login
         continueBtn.setEnabled(false);
         TextWatcher watcher = new TextWatcher() {

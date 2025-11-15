@@ -18,7 +18,7 @@ import androidx.core.content.ContextCompat;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private Button loginBtn, createAccountBtn;
+    private Button loginBtn;
     private TextView emailError, passError;
     private EditText email, password;
     private Drawable eyeOpen, eyeClosed;
@@ -32,7 +32,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // Initialize views
         loginBtn = findViewById(R.id.loginBtn);
-        createAccountBtn = findViewById(R.id.createAccountBtn);
+        Button createAccountBtn = findViewById(R.id.createAccountBtn);
         email = findViewById(R.id.email);
         password = findViewById(R.id.password);
         emailError = findViewById(R.id.emailError);
@@ -74,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // Navigate to next activity on login
         loginBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
             startActivity(intent);
         });
 

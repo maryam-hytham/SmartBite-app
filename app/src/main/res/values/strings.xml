@@ -12,4 +12,48 @@
     <string name="prompt_name">Enter your name</string>
     <string name="continue_btn">Continue</string>
     <string name="back_btn">Back</string>
+
+    <!--    Profile infos activity strings-->
+    <string name="profile">Create Profile</string>
+    <string name="prompt_age">Enter your Age</string>
+    <string name="prompt_weight">Enter your weight</string>
+    <string name="prompt_height">Enter your height</string>
+    <string name="title_1">Health Conditions</string>
+    <string name="title_2">Dietary Restrictions</string>
+    <string name="title_3">Allergies</string>
+    <string name="title_4">Personal Goals</string>
+
+    <!-- Health Conditions -->
+    <string name="hc_diabetes">Diabetes</string>
+    <string name="hc_high_blood_pressure">High Blood Pressure</string>
+    <string name="hc_heart_disease">Heart Disease</string>
+    <string name="hc_high_cholesterol">High Cholesterol</string>
+    <string name="hc_thyroid_issues">Thyroid Issues</string>
+
+    <!-- Allergies -->
+    <string name="allergy_nuts">Nuts</string>
+    <string name="allergy_dairy">Dairy</string>
+    <string name="allergy_eggs">Eggs</string>
+    <string name="allergy_soy">Soy</string>
+    <string name="allergy_shellfish">Shellfish</string>
+    <string name="allergy_wheat">Wheat</string>
+
+    <!-- Dietary Restrictions -->
+    <string name="diet_vegetarian">Vegetarian</string>
+    <string name="diet_vegan">Vegan</string>
+    <string name="diet_gluten_free">Gluten-Free</string>
+    <string name="diet_dairy_free">Dairy-Free</string>
+    <string name="diet_low_carb">Low-Carb</string>
+    <string name="diet_keto">Keto</string>
+
+    <!-- Personal Goals -->
+    <string name="goal_lose_weight">Lose Weight</string>
+    <string name="goal_build_muscle">Build Muscle</string>
+    <string name="goal_manage_diabetes">Manage Diabetes</string>
+    <string name="goal_increase_protein">Increase Protein</string>
+    <string name="goal_increase_fiber">Increase Fiber</string>
+    <string name="goal_lower_cholesterol">Lower Cholesterol</string>
+
+
+    <string name="save_continue_action">Save and Continue</string>
 </resources>

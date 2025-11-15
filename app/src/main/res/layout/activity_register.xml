@@ -56,20 +56,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!--        Applied padding here-->
+
         <EditText
             android:id="@+id/editName"
             android:layout_width="match_parent"
             android:layout_height="50dp"
+            android:layout_marginBottom="14dp"
             android:ems="10"
             android:hint="@string/prompt_name"
-            android:inputType="text"
-            android:paddingBottom="20dp" />
+            android:inputType="text" />
 
         <EditText
             android:id="@+id/editEmailAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp"
             android:ems="10"
             android:hint="@string/prompt_email"
             android:inputType="textEmailAddress" />
@@ -86,6 +87,7 @@
             android:id="@+id/editPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp"
             android:ems="10"
             android:hint="@string/prompt_password"
             android:inputType="textPassword" />

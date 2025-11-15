@@ -11,6 +11,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartBite">
         <activity
+            android:name=".ProfileInfosActivity"
+            android:exported="false" />
+        <activity
             android:name=".HomeActivity"
             android:exported="false" />
         <activity
