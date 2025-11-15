@@ -13,7 +13,7 @@
     <string name="continue_btn">Continue</string>
     <string name="back_btn">Back</string>
 
-    <!--    Profile infos activity strings-->
+    <!--Profile infos activity strings-->
     <string name="profile">Create Profile</string>
     <string name="prompt_age">Enter your Age</string>
     <string name="prompt_weight">Enter your weight</string>
@@ -53,7 +53,14 @@
     <string name="goal_increase_protein">Increase Protein</string>
     <string name="goal_increase_fiber">Increase Fiber</string>
     <string name="goal_lower_cholesterol">Lower Cholesterol</string>
-
-
     <string name="save_continue_action">Save and Continue</string>
+
+    <!--Home activity strings-->
+    <string name="Title">Ingredients</string>
+    <string name="under_title">Add whatever ingredients you have and get a personalised recipe!</string>
+    <string name="recipe_button">Find Recipe</string>
+    <string name="home_btn">Home</string>
+    <string name="settings_btn">Settings</string>
+    <string name="prompt_ingredients">Enter Ingredients</string>
+
 </resources>

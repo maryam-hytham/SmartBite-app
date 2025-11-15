@@ -72,9 +72,9 @@ public class LoginActivity extends AppCompatActivity {
         email.addTextChangedListener(watcher);
         password.addTextChangedListener(watcher);
 
-        // Navigate to next activity on login
+        // Navigate to create profile activity after login
         loginBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+            Intent intent = new Intent(LoginActivity.this, ProfileInfosActivity.class);
             startActivity(intent);
         });
 
