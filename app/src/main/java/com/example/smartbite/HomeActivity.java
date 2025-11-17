@@ -122,7 +122,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private String buildPrompt() {
         return "You are a helpful recipe assistant.\n" +
-                "Please generate a recipe based on the following:\n" +
+                "Generate a recipe based on the following:\n" +
                 "Ingredients: (its ok if not using all)" + String.join(", ", ingredientList) + "\n" +
                 "User conditions: " + userConditions + "\n" +
                 "Diet: " + userDiet + "\n" +
@@ -130,8 +130,8 @@ public class HomeActivity extends AppCompatActivity {
                 "Goals: " + userGoals + "\n\n" +
                 "The response should start with: 'Here is a recipe that matches your needs:'\n" +
                 "Then, write clearly:\n" +
-                "1. Recipe name\n" +
-                "2. How to make it (step by step, short and clear instructions)\n" +
+                "Recipe name\n" +
+                "How to make it (numbered step by step, short and clear instructions)\n" +
                 "Do not use bold and explain shortly how it fits the user in the end.\n" +
                 "Keep it concise and easy to follow.";
     }

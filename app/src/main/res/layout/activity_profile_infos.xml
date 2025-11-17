@@ -29,47 +29,6 @@
                 tools:layout_editor_absoluteX="32dp"
                 tools:layout_editor_absoluteY="64dp" />
 
-            <EditText
-                android:id="@+id/editHeight"
-                android:layout_width="348dp"
-                android:layout_height="47dp"
-                android:layout_gravity="center"
-                android:layout_marginBottom="16dp"
-                android:ems="10"
-                android:hint="@string/prompt_height"
-                android:inputType="number"
-                tools:layout_editor_absoluteX="32dp"
-                tools:layout_editor_absoluteY="170dp" />
-
-            <LinearLayout
-                android:layout_width="350dp"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:layout_marginBottom="24dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/editAge"
-                    android:layout_width="153dp"
-                    android:layout_height="46dp"
-                    android:layout_marginEnd="36dp"
-                    android:ems="10"
-                    android:hint="@string/prompt_age"
-                    android:inputType="numberDecimal"
-                    tools:layout_editor_absoluteX="32dp"
-                    tools:layout_editor_absoluteY="104dp" />
-
-                <EditText
-                    android:id="@+id/editWeight"
-                    android:layout_width="159dp"
-                    android:layout_height="45dp"
-                    android:ems="10"
-                    android:hint="@string/prompt_weight"
-                    android:inputType="number"
-                    tools:layout_editor_absoluteX="221dp"
-                    tools:layout_editor_absoluteY="104dp" />
-            </LinearLayout>
-
             <androidx.constraintlayout.widget.Guideline
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
