@@ -13,102 +13,111 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 public class RegisterActivity extends AppCompatActivity {
-    Button continueBtn, backBtn;
-    TextView emailError, passError;
-    EditText editEmailAddress, editPassword;
-    Drawable eyeOpen, eyeClosed;
-    boolean isPasswordVisible = false;
+
+    private Button continueBtn, backBtn;
+    private TextView emailError, passError;
+    private EditText editEmailAddress, editPassword;
+    private Drawable eyeOpen, eyeClosed;
+    private boolean isPasswordVisible = false;
+    private FirebaseAuth auth;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_register);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
-        continueBtn = (Button) findViewById(R.id.continueBtn);
-        backBtn = (Button) findViewById(R.id.backBtn);
-        emailError = (TextView) findViewById(R.id.emailError);
-        passError = (TextView) findViewById(R.id.passError);
-        editEmailAddress = (EditText) findViewById(R.id.editEmailAddress);
-        editPassword = (EditText) findViewById(R.id.editPassword);
-        eyeOpen = ContextCompat.getDrawable(this, R.drawable.eye__1_);
-        eyeClosed = ContextCompat.getDrawable(this, R.drawable.hidden__1_);
+        // Firebase Auth instance
+        auth = FirebaseAuth.getInstance();
 
-        // Resize eye icons to fit EditText
+        // Initialize views
+        continueBtn = findViewById(R.id.continueBtn);
+        backBtn = findViewById(R.id.backBtn);
+        emailError = findViewById(R.id.emailError);
+        passError = findViewById(R.id.passError);
+        editEmailAddress = findViewById(R.id.editEmailAddress);
+        editPassword = findViewById(R.id.editPassword);
+
+        // Load eye icons
+        eyeOpen = ContextCompat.getDrawable(this, R.drawable.eye);
+        eyeClosed = ContextCompat.getDrawable(this, R.drawable.hidden);
+
+        // Resize eye icons to fit EditText height
         int size = (int) (editPassword.getLineHeight() * 0.8);
         eyeOpen.setBounds(0, 0, size, size);
         eyeClosed.setBounds(0, 0, size, size);
 
-//        Navigate to create profile activity pressing continue button
-        continueBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent int1 = new Intent(RegisterActivity.this, ProfileInfosActivity.class);
-                startActivity(int1);
-            }
-        });
-
-
-        // To disable the button in the start till successful login
+        // Disable continue button initially
         continueBtn.setEnabled(false);
+
+        // TextWatcher for validation and eye icon visibility
         TextWatcher watcher = new TextWatcher() {
             @Override
-            public void afterTextChanged(Editable s) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void afterTextChanged(Editable s) {
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 validateInput();
-            }
-        };
-        editEmailAddress.addTextChangedListener(watcher);
-        editPassword.addTextChangedListener(watcher);
 
-        // Show eye icon when user types
-        editPassword.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.length() > 0) {
-                    editPassword.setCompoundDrawables(null, null, eyeOpen, null);
+                // Show eye icon if password has text
+                if (editPassword.getText().length() > 0) {
+                    if (isPasswordVisible) {
+                        editPassword.setCompoundDrawables(null, null, eyeClosed, null);
+                    } else {
+                        editPassword.setCompoundDrawables(null, null, eyeOpen, null);
+                    }
                 } else {
                     editPassword.setCompoundDrawables(null, null, null, null);
                     isPasswordVisible = false;
                     editPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 }
             }
+        };
+        editEmailAddress.addTextChangedListener(watcher);
+        editPassword.addTextChangedListener(watcher);
+
+        // Continue button: create new user
+        continueBtn.setOnClickListener(v -> {
+            String email = editEmailAddress.getText().toString().trim();
+            String password = editPassword.getText().toString().trim();
+
+            auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(RegisterActivity.this, "Account created successfully!", Toast.LENGTH_SHORT).show();
+                            // Delay navigation so toast can be seen
+                            editEmailAddress.postDelayed(() -> {
+                                Intent intent = new Intent(RegisterActivity.this, ProfileInfosActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }, 500); // 0.5 sec delay
+                        } else {
+                            String message = "Registration failed";
+                            if (task.getException() != null) {
+                                message += ": " + task.getException().getMessage();
+                            }
+                            Toast.makeText(RegisterActivity.this, message, Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
 
-        // Toggle password visibility when clicking the eye icon
+        // Toggle password visibility
         editPassword.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP) {
-                int drawableEnd = 2; // right drawable
+                int drawableEnd = 2;
                 if (editPassword.getCompoundDrawables()[drawableEnd] != null &&
                         event.getRawX() >= (editPassword.getRight() - editPassword.getCompoundDrawables()[drawableEnd].getBounds().width() - editPassword.getPaddingEnd())) {
 
@@ -128,18 +137,14 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         });
 
-        //    Back button to navigate back
-        backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent int2 = new Intent(RegisterActivity.this, LoginActivity.class);
-                startActivity(int2);
-            }
+        // Back button
+        backBtn.setOnClickListener(v -> {
+            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+            finish();
         });
     }
 
-    //    Method to validate email and password input
-    @SuppressLint("SetTextI18n")
+    // Validate email and password input
     private void validateInput() {
         String emailText = editEmailAddress.getText().toString().trim();
         String passText = editPassword.getText().toString().trim();
@@ -147,7 +152,6 @@ public class RegisterActivity extends AppCompatActivity {
         boolean validEmail = android.util.Patterns.EMAIL_ADDRESS.matcher(emailText).matches();
         boolean validPass = passText.length() >= 6;
 
-        // Show or clear error messages
         if (!validEmail && !emailText.isEmpty()) {
             emailError.setVisibility(View.VISIBLE);
             emailError.setText("Enter a valid email");
@@ -162,9 +166,6 @@ public class RegisterActivity extends AppCompatActivity {
             passError.setText("");
         }
 
-        // Enable the button only if both are valid
         continueBtn.setEnabled(validEmail && validPass);
     }
-
-
 }

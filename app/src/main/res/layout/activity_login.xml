@@ -12,15 +12,15 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="50dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
         app:cardCornerRadius="30dp"
         app:cardElevation="20dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:backgroundTint="@color/background"
+            android:background="@color/white"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -38,53 +38,46 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="@string/app_slogan"
-                android:textSize="20dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/appName"
-                app:layout_constraintVertical_bias="0.0" />
+                android:textColor="@color/extra"
+                android:textFontWeight="500"
+                android:textSize="18dp" />
 
             <TextView
                 android:id="@+id/appName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="5dp"
                 android:layout_marginBottom="40dp"
                 android:text="@string/welcoming"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.498"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageView"
-                app:layout_constraintVertical_bias="0.0" />
+                android:textColor="@color/primary"
+                android:textSize="12dp" />
 
             <LinearLayout
                 android:id="@+id/inputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="30dp"
-                android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/textView2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="@string/email" />
+                    android:layout_marginBottom="6dp"
+                    android:text="@string/email"
+                    android:textColor="@color/extra" />
 
                 <EditText
                     android:id="@+id/email"
                     android:layout_width="match_parent"
                     android:layout_height="47dp"
                     android:background="@drawable/custom_edittext"
+                    android:drawableLeft="@drawable/baseline_person_24"
+                    android:drawablePadding="8dp"
                     android:hint="@string/prompt_email"
                     android:inputType="textEmailAddress"
-                    android:paddingStart="12dp" />
+                    android:padding="8dp"
+                    android:textSize="14dp" />
 
                 <TextView
                     android:id="@+id/emailError"
@@ -98,18 +91,21 @@
                     android:id="@+id/textView3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/password" />
+                    android:layout_marginBottom="6dp"
+                    android:text="@string/password"
+                    android:textColor="@color/extra" />
 
                 <EditText
                     android:id="@+id/password"
                     android:layout_width="match_parent"
                     android:layout_height="51dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
                     android:background="@drawable/custom_edittext"
+                    android:drawableLeft="@drawable/baseline_lock_24"
+                    android:drawablePadding="8dp"
                     android:hint="@string/prompt_password"
                     android:inputType="textPassword"
-                    android:paddingStart="12dp" />
+                    android:padding="8dp"
+                    android:textSize="14dp" />
 
                 <TextView
                     android:id="@+id/passError"
@@ -121,20 +117,31 @@
             </LinearLayout>
 
             <Button
-                android:id="@+id/createAccountBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="14dp"
-                android:backgroundTint="@color/primary"
-                android:text="@string/action_create_account" />
-
-            <Button
                 android:id="@+id/loginBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="4dp"
                 android:enabled="false"
                 android:text="@string/action_login" />
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="- OR -"
+                android:textColor="@color/text_body" />
+
+            <Button
+                android:id="@+id/createAccountBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="20dp"
+                android:backgroundTint="@color/primary"
+                android:text="@string/action_create_account" />
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
