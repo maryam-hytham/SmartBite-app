@@ -1,104 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:gravity="center"
+    android:orientation="vertical"
     tools:context=".RegisterActivity">
 
-    <Button
-        android:id="@+id/continueBtn"
-        android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="96dp"
-        android:layout_marginBottom="8dp"
-        android:enabled="false"
-        android:text="@string/continue_btn"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout8"
-        app:layout_constraintVertical_bias="0.086" />
+        android:layout_margin="30dp"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="20dp">
 
-    <TextView
-        android:id="@+id/RegisterTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="45dp"
-        android:text="@string/action_create_account"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout8"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.219"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/backBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="75dp"
-        android:text="@string/back_btn"
-        app:layout_constraintBottom_toTopOf="@+id/RegisterTitle"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.126"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.754" />
-
-    <LinearLayout
-        android:id="@+id/linearLayout8"
-        android:layout_width="283dp"
-        android:layout_height="219dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-
-        <EditText
-            android:id="@+id/editName"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginBottom="14dp"
-            android:ems="10"
-            android:hint="@string/prompt_name"
-            android:inputType="text" />
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/editEmailAddress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="14dp"
-            android:ems="10"
-            android:hint="@string/prompt_email"
-            android:inputType="textEmailAddress" />
+            <Button
+                android:id="@+id/backBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="40dp"
+                android:backgroundTint="@color/primary"
+                android:text="@string/back_btn" />
 
-        <TextView
-            android:id="@+id/emailError"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="@android:color/holo_red_dark"
-            android:visibility="gone" />
+            <TextView
+                android:id="@+id/RegisterTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp"
+                android:gravity="center"
+                android:text="@string/action_create_account"
+                android:textColor="@color/extra"
+                android:textSize="18dp" />
 
-        <EditText
-            android:id="@+id/editPassword"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="14dp"
-            android:ems="10"
-            android:hint="@string/prompt_password"
-            android:inputType="textPassword" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="30dp"
+                android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/passError"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="@android:color/holo_red_dark" />
-        />
-    </LinearLayout>
+                <EditText
+                    android:id="@+id/editName"
+                    android:layout_width="match_parent"
+                    android:layout_height="47dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/custom_edittext"
+                    android:drawableStart="@drawable/outline_article_person_24"
+                    android:drawablePadding="8dp"
+                    android:hint="@string/prompt_name"
+                    android:padding="8dp"
+                    android:textSize="14dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                <EditText
+                    android:id="@+id/editEmailAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="47dp"
+                    android:background="@drawable/custom_edittext"
+                    android:drawableStart="@drawable/baseline_person_24"
+                    android:drawablePadding="8dp"
+                    android:hint="@string/prompt_email"
+                    android:inputType="textEmailAddress"
+                    android:padding="8dp"
+                    android:textSize="14dp" />
+
+                <TextView
+                    android:id="@+id/emailError"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/editPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="47dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/custom_edittext"
+                    android:drawableStart="@drawable/baseline_lock_24"
+                    android:drawablePadding="8dp"
+                    android:hint="@string/prompt_password"
+                    android:inputType="textPassword"
+                    android:padding="8dp"
+                    android:textSize="14dp" />
+
+                <TextView
+                    android:id="@+id/passError"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/continueBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp"
+                android:enabled="false"
+                android:text="@string/continue_btn" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</LinearLayout>

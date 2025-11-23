@@ -19,15 +19,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private Button continueBtn, backBtn;
     private TextView emailError, passError;
     private EditText editEmailAddress, editPassword;
-    private Drawable eyeOpen, eyeClosed;
+    private EditText editName;
+    private Drawable eyeOpen, eyeClosed, lockIcon;
     private boolean isPasswordVisible = false;
     private FirebaseAuth auth;
+
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -35,30 +41,28 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Firebase Auth instance
         auth = FirebaseAuth.getInstance();
 
-        // Initialize views
         continueBtn = findViewById(R.id.continueBtn);
         backBtn = findViewById(R.id.backBtn);
         emailError = findViewById(R.id.emailError);
         passError = findViewById(R.id.passError);
         editEmailAddress = findViewById(R.id.editEmailAddress);
         editPassword = findViewById(R.id.editPassword);
+        editName = findViewById(R.id.editName);
 
-        // Load eye icons
+        // Load icons
         eyeOpen = ContextCompat.getDrawable(this, R.drawable.eye);
         eyeClosed = ContextCompat.getDrawable(this, R.drawable.hidden);
+        lockIcon = ContextCompat.getDrawable(this, R.drawable.baseline_lock_24);
 
-        // Resize eye icons to fit EditText height
         int size = (int) (editPassword.getLineHeight() * 0.8);
         eyeOpen.setBounds(0, 0, size, size);
         eyeClosed.setBounds(0, 0, size, size);
+        lockIcon.setBounds(0, 0, size, size);
 
-        // Disable continue button initially
         continueBtn.setEnabled(false);
 
-        // TextWatcher for validation and eye icon visibility
         TextWatcher watcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -72,64 +76,84 @@ public class RegisterActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 validateInput();
 
-                // Show eye icon if password has text
                 if (editPassword.getText().length() > 0) {
-                    if (isPasswordVisible) {
-                        editPassword.setCompoundDrawables(null, null, eyeClosed, null);
-                    } else {
-                        editPassword.setCompoundDrawables(null, null, eyeOpen, null);
-                    }
+                    editPassword.setCompoundDrawables(lockIcon, null,
+                            isPasswordVisible ? eyeClosed : eyeOpen, null);
                 } else {
-                    editPassword.setCompoundDrawables(null, null, null, null);
+                    editPassword.setCompoundDrawables(lockIcon, null, null, null);
                     isPasswordVisible = false;
                     editPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 }
             }
         };
+
         editEmailAddress.addTextChangedListener(watcher);
         editPassword.addTextChangedListener(watcher);
 
-        // Continue button: create new user
         continueBtn.setOnClickListener(v -> {
+            String name = editName.getText().toString().trim();
             String email = editEmailAddress.getText().toString().trim();
             String password = editPassword.getText().toString().trim();
+
+            if (name.isEmpty()) {
+                Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            Toast.makeText(RegisterActivity.this, "Account created successfully!", Toast.LENGTH_SHORT).show();
-                            // Delay navigation so toast can be seen
-                            editEmailAddress.postDelayed(() -> {
-                                Intent intent = new Intent(RegisterActivity.this, ProfileInfosActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }, 500); // 0.5 sec delay
+
+                            String uid = auth.getCurrentUser().getUid();
+
+                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                            Map<String, Object> userData = new HashMap<>();
+                            userData.put("name", name);
+                            userData.put("email", email);
+
+                            db.collection("users").document(uid)
+                                    .set(userData)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Toast.makeText(RegisterActivity.this,
+                                                "Account created!", Toast.LENGTH_SHORT).show();
+
+                                        startActivity(new Intent(RegisterActivity.this,
+                                                ProfileInfosActivity.class));
+                                        finish();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(RegisterActivity.this,
+                                                "Failed to save data: " + e.getMessage(),
+                                                Toast.LENGTH_LONG).show();
+                                    });
+
                         } else {
-                            String message = "Registration failed";
-                            if (task.getException() != null) {
-                                message += ": " + task.getException().getMessage();
-                            }
-                            Toast.makeText(RegisterActivity.this, message, Toast.LENGTH_LONG).show();
+                            Toast.makeText(RegisterActivity.this,
+                                    "Registration failed: " + task.getException().getMessage(),
+                                    Toast.LENGTH_LONG).show();
                         }
                     });
         });
 
-        // Toggle password visibility
+
         editPassword.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 int drawableEnd = 2;
                 if (editPassword.getCompoundDrawables()[drawableEnd] != null &&
-                        event.getRawX() >= (editPassword.getRight() - editPassword.getCompoundDrawables()[drawableEnd].getBounds().width() - editPassword.getPaddingEnd())) {
+                        event.getRawX() >= (editPassword.getRight()
+                                - editPassword.getCompoundDrawables()[drawableEnd].getBounds().width()
+                                - editPassword.getPaddingEnd())) {
 
-                    if (isPasswordVisible) {
-                        editPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                        editPassword.setCompoundDrawables(null, null, eyeOpen, null);
-                        isPasswordVisible = false;
-                    } else {
-                        editPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                        editPassword.setCompoundDrawables(null, null, eyeClosed, null);
-                        isPasswordVisible = true;
-                    }
+                    isPasswordVisible = !isPasswordVisible;
+
+                    editPassword.setTransformationMethod(isPasswordVisible ?
+                            HideReturnsTransformationMethod.getInstance() :
+                            PasswordTransformationMethod.getInstance());
+
+                    editPassword.setCompoundDrawables(lockIcon, null,
+                            isPasswordVisible ? eyeClosed : eyeOpen, null);
+
                     editPassword.setSelection(editPassword.getText().length());
                     return true;
                 }
@@ -137,14 +161,12 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         });
 
-        // Back button
         backBtn.setOnClickListener(v -> {
             startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
             finish();
         });
     }
 
-    // Validate email and password input
     private void validateInput() {
         String emailText = editEmailAddress.getText().toString().trim();
         String passText = editPassword.getText().toString().trim();
@@ -155,17 +177,23 @@ public class RegisterActivity extends AppCompatActivity {
         if (!validEmail && !emailText.isEmpty()) {
             emailError.setVisibility(View.VISIBLE);
             emailError.setText("Enter a valid email");
+            emailError.setTextColor(getResources().getColor(R.color.primary));
         } else {
-            emailError.setText("");
             emailError.setVisibility(View.GONE);
         }
 
         if (!validPass && !passText.isEmpty()) {
+            passError.setVisibility(View.VISIBLE);
             passError.setText("Password must be at least 6 characters");
+            passError.setTextColor(getResources().getColor(R.color.primary));
         } else {
-            passError.setText("");
+            passError.setVisibility(View.GONE);
         }
 
         continueBtn.setEnabled(validEmail && validPass);
+        if (continueBtn.isEnabled()) {
+            continueBtn.setBackgroundColor(getResources().getColor(R.color.primary));
+        }
+
     }
 }
