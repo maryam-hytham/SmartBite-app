@@ -7,7 +7,7 @@
     <string name="prompt_password">Type your password</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
-    <string name="app_slogan">Eat smart, live healthy</string>
+    <string name="app_slogan">Eat smart , live healthy</string>
     <string name="action_create_account">Create Account</string>
 
     <!--Register activity strings-->

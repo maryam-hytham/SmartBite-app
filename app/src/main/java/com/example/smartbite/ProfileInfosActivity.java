@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,19 +12,29 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ProfileInfosActivity extends AppCompatActivity {
 
-    // Lists to store the user's selections
-    private final List<String> selectedHealthConditions = new ArrayList<>();
-    private final List<String> selectedDiet = new ArrayList<>();
-    private final List<String> selectedAllergies = new ArrayList<>();
-    private final List<String> selectedGoals = new ArrayList<>();
+    // UI Components
+    private ChipGroup chipGroupHealth, chipGroupAllergies, chipGroupDiet, chipGroupGoals;
+    private Button saveContinueBtn;
 
-    Button saveContinueBtn;
     private SharedPreferences prefs;
+
+    // Firebase Components
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,108 +42,121 @@ public class ProfileInfosActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile_infos);
 
-        // Adjust UI for system bars (status/navigation)
+        // Adjust UI for system bars
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
+        // Initialize Firebase
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+        // Initialize SharedPreferences (Optional: kept for local caching if needed)
         prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
 
+        // Bind Views using the IDs from your XML
+        chipGroupHealth = findViewById(R.id.chipGroupHealth);
+        chipGroupAllergies = findViewById(R.id.chipGroupAllergies);
+        chipGroupDiet = findViewById(R.id.chipGroupDiet);
+        chipGroupGoals = findViewById(R.id.chipGroupGoals);
         saveContinueBtn = findViewById(R.id.saveContinueBtn);
 
-        // Attach toggle logic for all button groups
-        setupToggleButtons();
+        // Set Click Listener for Save Button
+        saveContinueBtn.setOnClickListener(v -> saveDataAndContinue());
+    }
 
-        // Go to HomeActivity with all selected preferences
-        saveContinueBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(ProfileInfosActivity.this, HomeActivity.class);
+    private void saveDataAndContinue() {
+        // 1. Get the lists of selected chips from each group
+        List<String> healthConditions = getSelectedChips(chipGroupHealth);
+        List<String> allergies = getSelectedChips(chipGroupAllergies);
+        List<String> diet = getSelectedChips(chipGroupDiet);
+        List<String> goals = getSelectedChips(chipGroupGoals);
 
-            // Convert lists → comma separated text
-            String conditionsStr = String.join(", ", selectedHealthConditions);
-            String dietStr = String.join(", ", selectedDiet);
-            String allergiesStr = String.join(", ", selectedAllergies);
-            String goalsStr = String.join(", ", selectedGoals);
+        // 2. Check if user is logged in
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "User not logged in!", Toast.LENGTH_SHORT).show();
+            // Optional: Redirect to LoginActivity
+            return;
+        }
 
-            intent.putExtra("conditions", conditionsStr);
-            intent.putExtra("diet", dietStr);
-            intent.putExtra("allergies", allergiesStr);
-            intent.putExtra("goals", goalsStr);
+        // 3. Prepare data for Firestore
+        // Note: We save the List<String> directly. Firestore handles arrays natively.
+        Map<String, Object> userPreferences = new HashMap<>();
+        userPreferences.put("healthConditions", healthConditions);
+        userPreferences.put("allergies", allergies);
+        userPreferences.put("dietaryPreferences", diet);
+        userPreferences.put("goals", goals);
 
-            // Save to SharedPreferences for persistence
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putString("conditions", conditionsStr);
-            editor.putString("diet", dietStr);
-            editor.putString("allergies", allergiesStr);
-            editor.putString("goals", goalsStr);
-            editor.apply();
+        // Optional: Add a flag that profile setup is complete
+        userPreferences.put("isProfileSetup", true);
 
-            startActivity(intent);
-        });
+        // Disable button to prevent double-click while saving
+        saveContinueBtn.setEnabled(false);
+        saveContinueBtn.setText("Saving...");
+
+        // 4. Update Firestore Document
+        // We use SetOptions.merge() so we don't overwrite the existing Name/Email
+        db.collection("users").document(currentUser.getUid())
+                .set(userPreferences, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> {
+
+                    // --- SUCCESS ---
+
+                    // Also save to SharedPreferences (for fast local access without internet)
+                    saveToSharedPreferences(healthConditions, allergies, diet, goals);
+
+                    Toast.makeText(ProfileInfosActivity.this, "Preferences Saved!", Toast.LENGTH_SHORT).show();
+
+                    // Navigate to HomeActivity
+                    Intent intent = new Intent(ProfileInfosActivity.this, HomeActivity.class);
+                    // We can pass data, or let HomeActivity fetch it from Firebase
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    // --- FAILURE ---
+                    saveContinueBtn.setEnabled(true);
+                    saveContinueBtn.setText("Save & Continue");
+                    Toast.makeText(ProfileInfosActivity.this, "Error saving data: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+    }
+
+    // Helper to save string versions to SharedPreferences
+    private void saveToSharedPreferences(List<String> health, List<String> allergies, List<String> diet, List<String> goals) {
+        String conditionsStr = String.join(", ", health);
+        String dietStr = String.join(", ", diet);
+        String allergiesStr = String.join(", ", allergies);
+        String goalsStr = String.join(", ", goals);
+
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("conditions", conditionsStr);
+        editor.putString("diet", dietStr);
+        editor.putString("allergies", allergiesStr);
+        editor.putString("goals", goalsStr);
+        editor.apply();
     }
 
     /**
-     * Helper method to turn any button into a toggle button.
-     * When clicked → highlight it and add the value to the list.
-     * When clicked again → remove from list.
+     * Helper method to iterate through a ChipGroup and return a list of texts
+     * from the Chips that are currently checked.
      */
-    private void enableToggle(Button btn, String value, List<String> list) {
-        btn.setOnClickListener(v -> {
-            if (list.contains(value)) {
-                // Unselect
-                list.remove(value);
-                btn.setBackgroundColor(getColor(android.R.color.holo_purple));
-            } else {
-                // Select
-                list.add(value);
-                btn.setBackgroundColor(getColor(android.R.color.holo_green_dark));
+    private List<String> getSelectedChips(ChipGroup chipGroup) {
+        List<String> selectedValues = new ArrayList<>();
+
+        // getCheckedChipIds returns a list of the integer IDs of checked chips
+        List<Integer> checkedChipIds = chipGroup.getCheckedChipIds();
+
+        for (Integer id : checkedChipIds) {
+            Chip chip = chipGroup.findViewById(id);
+            if (chip != null) {
+                // We assume the chip text matches the value we want to save
+                selectedValues.add(chip.getText().toString());
             }
-        });
-    }
+        }
 
-    /**
-     * Attach toggle behavior to all buttons.
-     * All IDs are taken from your XML exactly.
-     */
-    private void setupToggleButtons() {
-
-        // -------------------------------
-        // HEALTH CONDITIONS
-        // -------------------------------
-        enableToggle(findViewById(R.id.button3), "Diabetes", selectedHealthConditions);
-        enableToggle(findViewById(R.id.button4), "Heart Disease", selectedHealthConditions);
-        enableToggle(findViewById(R.id.button6), "High Cholesterol", selectedHealthConditions);
-        enableToggle(findViewById(R.id.button5), "Thyroid Issues", selectedHealthConditions);
-        enableToggle(findViewById(R.id.button7), "High Blood Pressure", selectedHealthConditions);
-
-        // -------------------------------
-        // GOALS
-        // -------------------------------
-        enableToggle(findViewById(R.id.button30), "Build Muscle", selectedGoals);
-        enableToggle(findViewById(R.id.button29), "Increase Fiber", selectedGoals);
-        enableToggle(findViewById(R.id.button28), "Increase Protein", selectedGoals);
-        enableToggle(findViewById(R.id.button14), "Lower Cholesterol", selectedGoals);
-        enableToggle(findViewById(R.id.button26), "Manage Diabetes", selectedGoals);
-
-        // -------------------------------
-        // ALLERGIES
-        // -------------------------------
-        enableToggle(findViewById(R.id.button15), "Dairy", selectedAllergies);
-        enableToggle(findViewById(R.id.button16), "Eggs", selectedAllergies);
-        enableToggle(findViewById(R.id.button25), "Nuts", selectedAllergies);
-        enableToggle(findViewById(R.id.button24), "Shellfish", selectedAllergies);
-        enableToggle(findViewById(R.id.button19), "Soy", selectedAllergies);
-        enableToggle(findViewById(R.id.button31), "Wheat", selectedAllergies);
-
-        // -------------------------------
-        // DIETARY RESTRICTIONS
-        // -------------------------------
-        enableToggle(findViewById(R.id.button8), "Dairy-Free", selectedDiet);
-        enableToggle(findViewById(R.id.button9), "Gluten-Free", selectedDiet);
-        enableToggle(findViewById(R.id.button10), "Keto", selectedDiet);
-        enableToggle(findViewById(R.id.button11), "Low-Carb", selectedDiet);
-        enableToggle(findViewById(R.id.button12), "Vegan", selectedDiet);
-        enableToggle(findViewById(R.id.button13), "Vegetarian", selectedDiet);
+        return selectedValues;
     }
 }

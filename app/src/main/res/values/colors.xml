@@ -6,7 +6,8 @@
     <color name="text_2">#882d2d</color>
     <color name="background">#fff8f0</color>
     <color name="primary">#ff9726</color>
-    <color name="secondary">#ed8a8a</color>
+    <color name="secondary">#F29C9C</color>
+    <color name="lighter_sec">#F8E0E6</color>
     <color name="accent">#ffd166</color>
     <color name="extra">#c02810</color>
     <color name="text_body">#97959595</color>

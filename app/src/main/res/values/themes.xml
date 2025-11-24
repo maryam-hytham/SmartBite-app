@@ -4,6 +4,17 @@
 
         <item name="android:fontFamily">@font/poppins</item>
         <item name="fontFamily">@font/poppins</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorSecondary">@color/secondary</item>
+    </style>
+
+    <style name="CustomChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
+        <!-- Link the background selector we made in Step 1 -->
+        <item name="chipBackgroundColor">@color/chip_color_selector</item>
+
+
+        <!-- Optional: Remove the checkmark icon if you just want color change -->
+        <item name="checkedIconVisible">true</item>
     </style>
 
     <style name="Theme.SmartBite" parent="Base.Theme.SmartBite" />
