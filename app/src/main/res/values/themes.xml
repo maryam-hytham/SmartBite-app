@@ -1,12 +1,19 @@
 <resources>
 
-    <style name="Base.Theme.SmartBite" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.SmartBite" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
         <item name="android:fontFamily">@font/poppins</item>
         <item name="fontFamily">@font/poppins</item>
-        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimary">@color/extra</item>
         <item name="colorSecondary">@color/secondary</item>
+
+        <!-- Apply Material 3 Filled Button style to all buttons globally -->
+        <item name="materialButtonStyle">@style/Widget.Material3.Button</item>
+
+        <!-- Optional: Also override standard buttonStyle for wider compatibility -->
+        <item name="android:buttonStyle">@style/Widget.Material3.Button</item>
     </style>
+
 
     <style name="CustomChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
         <!-- Link the background selector we made in Step 1 -->

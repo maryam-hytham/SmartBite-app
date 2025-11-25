@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <style name="CustomActiveIndicator" parent="">
+        <!-- This color will be used for the active tab indicator -->
+        <item name="android:color">@color/lighter_sec</item>
+    </style>
+
+
+</resources>

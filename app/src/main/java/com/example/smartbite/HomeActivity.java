@@ -5,14 +5,16 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.LayoutInflater;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,93 +39,114 @@ public class HomeActivity extends AppCompatActivity {
             "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s";
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
-    private FlexboxLayout ingredientsContainer;
+
+    // UI Components - Changed from FlexboxLayout to ChipGroup
+    private ChipGroup ingredientsContainer;
     private EditText questionEditText;
     private Button addIngredientBtn, getRecipeBtn;
-    private TextView answerTextView;
-    private List<String> ingredientList = new ArrayList<>();
-    private String userConditions;
-    private String userDiet;
-    private String userAllergies;
-    private String userGoals;
-    private SharedPreferences prefs;
+    private BottomNavigationView bottomNavigationView;
 
+    // Data
+    private List<String> ingredientList = new ArrayList<>();
+    private String userConditions, userDiet, userAllergies, userGoals;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        // 1. Initialize Views
         ingredientsContainer = findViewById(R.id.ingredientsContainer);
         questionEditText = findViewById(R.id.questionEditText);
         addIngredientBtn = findViewById(R.id.addIngredientBtn);
         getRecipeBtn = findViewById(R.id.getRecipeBtn);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-
+        // 2. Load User Preferences
         prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        loadUserPreferences();
 
-        // Load preferences: Use Intent extras if available, otherwise fall back to SharedPreferences
-        userConditions = getIntent().getStringExtra("conditions");
-        if (userConditions == null || userConditions.isEmpty()) {
-            userConditions = prefs.getString("conditions", "None specified");
-        }
+        // 3. Setup Bottom Navigation
+        setupBottomNavigation();
 
-        userDiet = getIntent().getStringExtra("diet");
-        if (userDiet == null || userDiet.isEmpty()) {
-            userDiet = prefs.getString("diet", "None specified");
-        }
-
-        userAllergies = getIntent().getStringExtra("allergies");
-        if (userAllergies == null || userAllergies.isEmpty()) {
-            userAllergies = prefs.getString("allergies", "None specified");
-        }
-
-        userGoals = getIntent().getStringExtra("goals");
-        if (userGoals == null || userGoals.isEmpty()) {
-            userGoals = prefs.getString("goals", "None specified");
-        }
-
+        // 4. Add Ingredient Logic
         addIngredientBtn.setOnClickListener(v -> {
             String ing = questionEditText.getText().toString().trim();
             if (!ing.isEmpty() && !ingredientList.contains(ing)) {
                 ingredientList.add(ing);
-                addIngredientButton(ing);
+                addIngredientChip(ing); // Function renamed
                 questionEditText.setText("");
             }
         });
 
+        // 5. Get Recipe Logic
         getRecipeBtn.setOnClickListener(v -> {
             if (ingredientList.isEmpty()) {
-                answerTextView.setText("Please add at least one ingredient.");
+                Toast.makeText(HomeActivity.this, "Please add at least one ingredient.", Toast.LENGTH_SHORT).show();
                 return;
             }
             String prompt = buildPrompt();
-            callGenerateContent(prompt);
+
             getRecipeBtn.setEnabled(false);
+            getRecipeBtn.setText("Generating...");
+
+            callGenerateContent(prompt);
         });
     }
 
-    private void addIngredientButton(String ingredient) {
-        Button btn = new Button(this);
-        btn.setText(ingredient + " ✕");
-        btn.setOnClickListener(v -> {
+    // ... (loadUserPreferences and setupBottomNavigation remain unchanged) ...
+    private void loadUserPreferences() {
+        userConditions = getIntent().getStringExtra("conditions");
+        if (userConditions == null) userConditions = prefs.getString("conditions", "None");
+
+        userDiet = getIntent().getStringExtra("diet");
+        if (userDiet == null) userDiet = prefs.getString("diet", "None");
+
+        userAllergies = getIntent().getStringExtra("allergies");
+        if (userAllergies == null) userAllergies = prefs.getString("allergies", "None");
+
+        userGoals = getIntent().getStringExtra("goals");
+        if (userGoals == null) userGoals = prefs.getString("goals", "None");
+    }
+
+    private void setupBottomNavigation() {
+        bottomNavigationView.setSelectedItemId(R.id.item_1);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.item_1) {
+                return true;
+            } else if (id == R.id.item_2) {
+                Intent intent = new Intent(HomeActivity.this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    // --- MODIFIED FUNCTION: Creates a Chip instead of a Button ---
+    private void addIngredientChip(String ingredient) {
+        // Inflate the chip from the XML layout to keep the 'Entry' style
+        Chip chip = (Chip) LayoutInflater.from(this)
+                .inflate(R.layout.item_chip_entry, ingredientsContainer, false);
+
+        chip.setText(ingredient);
+
+        // Logic to remove chip when the 'X' icon is clicked
+        chip.setOnCloseIconClickListener(v -> {
             ingredientList.remove(ingredient);
-            ingredientsContainer.removeView(btn);
+            ingredientsContainer.removeView(chip);
         });
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
 
-        );
-        params.setMargins(8, 8, 8, 8);
-        btn.setLayoutParams(params);
-        ingredientsContainer.addView(btn);
+        ingredientsContainer.addView(chip);
     }
 
+    // ... (buildPrompt and callGenerateContent remain unchanged) ...
     private String buildPrompt() {
         return "You are a helpful recipe assistant.\n" +
                 "Generate a recipe based on the following:\n" +
-                "Ingredients: (its ok if not using all)" + String.join(", ", ingredientList) + "\n" +
+                "Ingredients: " + String.join(", ", ingredientList) + "\n" +
                 "User conditions: " + userConditions + "\n" +
                 "Diet: " + userDiet + "\n" +
                 "Allergies: " + userAllergies + "\n" +
@@ -197,13 +220,12 @@ public class HomeActivity extends AppCompatActivity {
             String finalRes = result;
             mainHandler.post(() -> {
                 getRecipeBtn.setEnabled(true);
+                getRecipeBtn.setText("Get Recipe");
 
-                // Instead of setting TextView directly, open RecipeActivity
                 Intent intent = new Intent(HomeActivity.this, RecipeActivity.class);
                 intent.putExtra(RecipeActivity.EXTRA_RECIPE, finalRes);
                 startActivity(intent);
             });
-
         });
     }
 }

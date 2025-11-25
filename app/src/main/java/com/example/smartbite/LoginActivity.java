@@ -100,6 +100,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         // Login button: sign in existing user
+        // Login button: sign in existing user
         loginBtn.setOnClickListener(v -> {
             String emailText = email.getText().toString().trim();
             String passText = password.getText().toString().trim();
@@ -108,9 +109,12 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(LoginActivity.this, ProfileInfosActivity.class);
+
+                            // --- CHANGED HERE: Go to HomeActivity instead of ProfileInfosActivity ---
+                            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                             startActivity(intent);
-                            finish();
+                            finish(); // Prevents user from going back to login screen
+
                         } else {
                             Toast.makeText(LoginActivity.this, "Login failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
