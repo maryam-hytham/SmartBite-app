@@ -33,7 +33,7 @@ import java.util.concurrent.Executors;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private final String apiKey = "AIzaSyBQwYQmPXNsh_hnY0FRyxPk79c_gxaEKs8";
+    private final String apiKey = "AIzaSyD_QYI-zaQshT_B-TWvdY4CYgaUkfwXZjY";
     private final String model = "gemini-2.5-flash-preview-09-2025";
     private final String apiUrlTemplate =
             "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s";
@@ -162,8 +162,10 @@ public class HomeActivity extends AppCompatActivity {
     private void callGenerateContent(String prompt) {
         executor.execute(() -> {
             String result = "";
+            boolean isSuccess = false; // Add a success flag
             HttpURLConnection conn = null;
             try {
+                // 1. Setup Connection
                 String apiUrl = String.format(apiUrlTemplate, model, apiKey);
                 URL url = new URL(apiUrl);
                 conn = (HttpURLConnection) url.openConnection();
@@ -171,21 +173,19 @@ public class HomeActivity extends AppCompatActivity {
                 conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 conn.setDoOutput(true);
 
+                // 2. Build JSON Payload
                 JSONObject part = new JSONObject();
                 part.put("text", prompt);
-
                 JSONArray parts = new JSONArray();
                 parts.put(part);
-
                 JSONObject content = new JSONObject();
                 content.put("parts", parts);
-
                 JSONArray contents = new JSONArray();
                 contents.put(content);
-
                 JSONObject payload = new JSONObject();
                 payload.put("contents", contents);
 
+                // 3. Send Request
                 OutputStream os = conn.getOutputStream();
                 BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
                 w.write(payload.toString());
@@ -193,6 +193,7 @@ public class HomeActivity extends AppCompatActivity {
                 w.close();
                 os.close();
 
+                // 4. Handle Response
                 int code = conn.getResponseCode();
                 if (code == 200) {
                     BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -207,24 +208,43 @@ public class HomeActivity extends AppCompatActivity {
                     JSONObject cont = first.getJSONObject("content");
                     JSONArray parts2 = cont.getJSONArray("parts");
                     result = parts2.getJSONObject(0).getString("text");
-
+                    isSuccess = true; // Mark as successful
                 } else {
-                    result = "HTTP Error: " + code;
+                    // Read the error message from the Error Stream to see WHY it failed
+                    BufferedReader errorReader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                    StringBuilder errorSb = new StringBuilder();
+                    String line;
+                    while ((line = errorReader.readLine()) != null) errorSb.append(line);
+                    errorReader.close();
+                    result = "Error " + code + ": " + errorSb.toString();
+                    isSuccess = false;
                 }
             } catch (Exception e) {
-                result = "Error: " + e.getMessage();
+                result = "Exception: " + e.getMessage();
+                isSuccess = false;
             } finally {
                 if (conn != null) conn.disconnect();
             }
 
+            // 5. Update UI on Main Thread
             String finalRes = result;
+            boolean finalSuccess = isSuccess;
+
             mainHandler.post(() -> {
+                // Re-enable the button
                 getRecipeBtn.setEnabled(true);
                 getRecipeBtn.setText("Get Recipe");
 
-                Intent intent = new Intent(HomeActivity.this, RecipeActivity.class);
-                intent.putExtra(RecipeActivity.EXTRA_RECIPE, finalRes);
-                startActivity(intent);
+                if (finalSuccess) {
+                    // ONLY open the new activity if it worked
+                    Intent intent = new Intent(HomeActivity.this, RecipeActivity.class);
+                    intent.putExtra(RecipeActivity.EXTRA_RECIPE, finalRes);
+                    startActivity(intent);
+                } else {
+                    // Show the error in a Toast so you can debug it
+                    Toast.makeText(HomeActivity.this, finalRes, Toast.LENGTH_LONG).show();
+                    System.out.println("GEMINI_ERROR: " + finalRes); // Log to Logcat
+                }
             });
         });
     }
